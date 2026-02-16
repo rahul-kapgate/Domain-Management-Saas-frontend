@@ -17,7 +17,9 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("user");
     return saved ? (JSON.parse(saved) as User) : null;
@@ -25,7 +27,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const isAuthenticated = !!localStorage.getItem("accessToken");
 
-  const login = async ({ email, password }: { email: string; password: string }) => {
+  const login = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
     const res = await api.post("/api/v1/auth/login", { email, password });
 
     const accessToken = res?.data?.data?.accessToken as string | undefined;
@@ -39,7 +47,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("user", JSON.stringify(userData));
+
     setUser(userData);
+
+    return userData; 
   };
 
   const logout = () => {
@@ -51,9 +62,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const value = useMemo(
     () => ({ user, isAuthenticated, login, logout }),
-    [user, isAuthenticated]
+    [user, isAuthenticated],
   );
 
+  //@ts-ignore
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
